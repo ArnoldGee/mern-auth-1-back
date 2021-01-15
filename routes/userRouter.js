@@ -105,11 +105,9 @@ router.delete('/delete', auth, async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.userId);
     if (!deletedUser) {
-      res
-        .status(400)
-        .json({
-          msg: `No user with id ${req.userId} was registered in our database, so no user was deleted.`,
-        });
+      res.status(400).json({
+        msg: `No user with id ${req.userId} was registered in our database, so no user was deleted.`,
+      });
     }
     res.status(200).json({
       msg: `User ${deletedUser.displayName} successfully deleted`,
@@ -120,18 +118,18 @@ router.delete('/delete', auth, async (req, res) => {
   }
 });
 
-router.post('/tokenIsValid', async(req, res) => {
- try {
-   if(!token) return res.status(200).json(false)
-   const verified = jwt.verify(token, process.env.JWT_SECRET);
-   if (!verified) return res.status(200).json(false);
-   const user = User.findById(verified.id)
-   if (!user) return res.status(200).json(false);
-   res.status(200).json(true);
- } catch (err) {
-   res.status(500).json({msg: 'Internal server error: ' + err.message});
- }
-
-})
+router.post('/tokenIsValid', async (req, res) => {
+  try {
+    const token = req.header('x-auth-token');
+    if (!token) return res.status(200).json(false);
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    if (!verified) return res.status(200).json(false);
+    const user = User.findById(verified.id);
+    if (!user) return res.status(200).json(false);
+    res.status(200).json(true);
+  } catch (err) {
+    res.status(500).json({msg: 'Internal server error: ' + err.message});
+  }
+});
 
 module.exports = router;
