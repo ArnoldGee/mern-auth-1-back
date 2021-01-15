@@ -2,6 +2,7 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const auth = require('../middleware/auth');
 const User = require('../models/userModel');
 
 router.get('/test', (req, res) => {
@@ -86,14 +87,51 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign({id: user._id}, process.env.JWT_SECRET);
-    res.status(200).send({msg: 'Login successful', token, user: {
-      id: user._id,
-      displayName: user.displayName,
-      email: user.email
-    }});
+    res.status(200).send({
+      msg: 'Login successful',
+      token,
+      user: {
+        id: user._id,
+        displayName: user.displayName,
+        email: user.email,
+      },
+    });
   } catch (err) {
     res.status(500).json({msg: 'Internal server error: ' + err.message});
   }
 });
+
+router.delete('/delete', auth, async (req, res) => {
+  try {
+    const deletedUser = await User.findByIdAndDelete(req.userId);
+    if (!deletedUser) {
+      res
+        .status(400)
+        .json({
+          msg: `No user with id ${req.userId} was registered in our database, so no user was deleted.`,
+        });
+    }
+    res.status(200).json({
+      msg: `User ${deletedUser.displayName} successfully deleted`,
+      deletedUser,
+    });
+  } catch (err) {
+    res.status(500).json({msg: 'Internal server error: ' + err.message});
+  }
+});
+
+router.post('/tokenIsValid', async(req, res) => {
+ try {
+   if(!token) return res.status(200).json(false)
+   const verified = jwt.verify(token, process.env.JWT_SECRET);
+   if (!verified) return res.status(200).json(false);
+   const user = User.findById(verified.id)
+   if (!user) return res.status(200).json(false);
+   res.status(200).json(true);
+ } catch (err) {
+   res.status(500).json({msg: 'Internal server error: ' + err.message});
+ }
+
+})
 
 module.exports = router;
