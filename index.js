@@ -11,7 +11,7 @@ const {MONGODB_CONNECTION_STRING} = process.env
 // connect to mongodb atlas
 mongoose.connect(
   MONGODB_CONNECTION_STRING,
-  {useUnifiedTopology: true, useNewUrlParser: true},
+  {useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true},
   (err) => {
     if (err) throw err;
     console.log('Connection to MONGODB successful :)'); // Animation starts
