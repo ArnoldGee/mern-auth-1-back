@@ -6,7 +6,7 @@ const chalkAnimation = require('chalk-animation');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const {MONGODB_CONNECTION_STRING} = process.env
+const {MONGODB_CONNECTION_STRING} = process.env;
 
 // connect to mongodb atlas
 mongoose.connect(
@@ -23,7 +23,9 @@ app.use(express.json());
 app.use(cors());
 
 // set up routes middleware
-app.use('/users', require('./routes/userRouter'))
+app.use('/users', require('./routes/userRouter'));
+app.use('/todos', require('./routes/todoRouter'));
+
 
 // listen to port
 app.listen(PORT, () => {

@@ -20,7 +20,7 @@ router.post('/register', async (req, res) => {
     // check if you've actually received the data
     if (!email || !password || !repeatPassword) {
       return res.status(400).json({
-        msg: 'not all fields have been received',
+        msg: 'Not all fields have been received',
       });
     }
     if (password !== repeatPassword) {
@@ -127,6 +127,27 @@ router.post('/tokenIsValid', async (req, res) => {
     const user = User.findById(verified.id);
     if (!user) return res.status(200).json(false);
     res.status(200).json(true);
+  } catch (err) {
+    res.status(500).json({msg: 'Internal server error: ' + err.message});
+  }
+});
+
+router.get('/', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      res.status(400).json({
+        msg: `No user with id ${req.userId} was registered in our database, so no user was deleted.`,
+      });
+    }
+    res.status(200).json({
+      msg: `User data of ${user.displayName} successfully retrieved`,
+      user: {
+        email: user.email,
+        displayName: user.displayName,
+        id: user._id,
+      },
+    });
   } catch (err) {
     res.status(500).json({msg: 'Internal server error: ' + err.message});
   }
